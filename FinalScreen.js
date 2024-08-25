@@ -1,35 +1,52 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Image, ScrollView } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
 export default function FinalScreen() {
   const navigation = useNavigation();
+  const route = useRoute();
+  console.log('Received params in FinalScreen:', route.params);
+  const { summary, oneLineSummary, imageUrl } = route.params || {}; // 전달된 요약 정보 및 이미지 URL
+
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!summary && !oneLineSummary && !imageUrl) {
+      console.error('요약 정보 또는 이미지가 제공되지 않았습니다.');
+      setLoading(false);
+      return;
+    }
+
+    // 로딩 상태 해제
+    setLoading(false);
+  }, [summary, oneLineSummary, imageUrl]);
 
   return (
     <View style={styles.container}>
-        <View style={styles.titleContainer}>
-            <Text style={styles.titleText}>인생필름</Text>
-        </View>
+      <View style={styles.titleContainer}>
+        <Text style={styles.titleText}>인생필름</Text>
+      </View>
       <ScrollView contentContainerStyle={styles.scrollView}>
-        <Image source={require('./assets/exPhoto1.jpg')} style={styles.mainImage} />
-        <Text style={styles.message}>
-          이 사진은 당신이 녹화한 영상의 대표 이미지입니다. 이 순간은 당신에게 특별한 의미가 있을 것입니다. 
-          아마도 중요한 이벤트나 소중한 사람과의 순간이 담겨 있을 것입니다. 이 장면을 통해 당신이 
-          느꼈던 감정과 생각이 다시 떠오를 것입니다. 이 이미지는 당신의 기억을 되살리고, 앞으로도 
-          기억하고 싶은 순간으로 남을 것입니다. 우리의 삶은 이러한 작은 순간들로 채워져 있으며, 
-          그 순간들을 기록하고 보존하는 것이 중요합니다. 이 이미지는 그러한 소중한 순간의 증거입니다. 
-          이 사진을 볼 때마다 그 순간의 감정을 되새기며, 앞으로도 당신의 이야기를 계속 기록해 나가시기 바랍니다.
-        </Text>
+        <View style={styles.imageContainer}>
+          {imageUrl ? (
+            <TouchableOpacity onPress={() => console.log('메인 이미지가 클릭되었습니다.')}>
+              <Image source={{ uri: imageUrl }} style={styles.mainImage} />
+            </TouchableOpacity>
+          ) : (
+            <Text>이미지가 없습니다.</Text>
+          )}
+          <Text style={styles.summaryText}>{summary || '요약 정보가 없습니다.'}</Text>
+          <Text style={styles.oneLineSummaryText}>{oneLineSummary || '한 줄 요약 정보가 없습니다.'}</Text>
+        </View>
       </ScrollView>
-
       <View style={styles.footer}>
-        <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('ViewVideo')}>
-          <Image source={require('./assets/calendar.png')} style={styles.footerIcon} />
-          <Text style={styles.footerText}>일기 보기</Text>
-        </TouchableOpacity>
         <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('Main')}>
           <Image source={require('./assets/home.png')} style={styles.footerIcon} />
           <Text style={styles.footerText}>처음으로</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('ViewVideo')}>
+          <Image source={require('./assets/calendar.png')} style={styles.footerIcon} />
+          <Text style={styles.footerText}>일기 보기</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('MyPage')}>
           <Image source={require('./assets/profile.png')} style={styles.footerIcon} />
@@ -41,30 +58,33 @@ export default function FinalScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#F8F8F8',
-        alignItems: 'center',
-        paddingTop: 0,
-      },
-      titleContainer: {
-        width: '100%',
-        paddingVertical: 15,
-        backgroundColor: '#FFFFFF',
-        alignItems: 'flex-start',
-        paddingTop: 50,
-        paddingLeft: 20,
-        marginBottom: 30,
-      },
-      titleText: {
-        fontSize: 24,
-        color: '#000',
-        fontFamily: 'GowunBatangBold',
-      },
-
+  container: {
+    flex: 1,
+    backgroundColor: '#F8F8F8',
+    alignItems: 'center',
+    paddingTop: 0,
+  },
+  titleContainer: {
+    width: '100%',
+    paddingVertical: 5,
+    backgroundColor: '#FFFFFF', // 흰색 배경
+    alignItems: 'flex-start', // 글씨를 왼쪽에 배치
+    paddingTop: 60,
+    paddingLeft: 20, // 왼쪽 여백 추가
+    marginBottom: 30, // 상단 바 아래 공간 추가
+  },
+  titleText: {
+    fontSize: 24,
+    color: '#000',
+    fontFamily: 'GowunBatangBold',
+  },
   scrollView: {
     alignItems: 'center',
     paddingBottom: 20,
+  },
+  imageContainer: {
+    alignItems: 'center',
+    width: '100%',
   },
   mainImage: {
     width: '100%',
@@ -72,12 +92,19 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
     marginBottom: 20,
   },
-  message: {
+  summaryText: {
     fontSize: 18,
     textAlign: 'center',
-    marginBottom: 20,
-    marginHorizontal:10,
+    marginBottom: 10,
+    marginHorizontal: 10,
     fontFamily: 'GowunBatangBold',
+  },
+  oneLineSummaryText: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 20,
+    marginHorizontal: 10,
+    fontFamily: 'GowunBatang',
   },
   footer: {
     position: 'absolute',

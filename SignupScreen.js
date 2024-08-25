@@ -26,7 +26,7 @@ export default function SignupScreen() {
     const loginSuccessful = true; // 실제 로그인 로직을 구현하세요.
 
     if (loginSuccessful) {
-      navigation.navigate('Final'); // 홈 화면으로 이동
+      navigation.navigate('Main'); // 홈 화면으로 이동
     }
   };
 

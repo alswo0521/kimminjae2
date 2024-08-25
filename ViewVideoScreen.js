@@ -17,7 +17,7 @@ export default function DiaryScreen() {
   }
 
   const handleCalendarPress = () => {
-    console.log('캘린더 아이콘이 클릭되었습니다.');
+    navigation.navigate('Calendar');
   };
 
   const handleVideoPress = (date) => {
@@ -95,10 +95,10 @@ const styles = StyleSheet.create({
   // 상단 타이틀 스타일
   titleContainer: {
     width: '100%',
-    paddingVertical: 15,
+    paddingVertical: 5,
     backgroundColor: '#FFFFFF', // 흰색 배경
     alignItems: 'flex-start', // 글씨를 왼쪽에 배치
-    paddingTop: 50,
+    paddingTop: 60,
     paddingLeft: 20, // 왼쪽 여백 추가
     marginBottom: 30, // 상단 바 아래 공간 추가
   },

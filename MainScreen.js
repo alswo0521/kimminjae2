@@ -36,9 +36,9 @@ export default function MainScreen() {
         >
       <StatusBar style="auto" />
     <View style={styles.container}>
-      <View style={styles.header}>
-          <Text style={styles.title}>인생일기</Text>
-      </View >
+    <View style={styles.titleContainer}>
+        <Text style={styles.titleText}>인생필름</Text>
+      </View>
 
       <View style={styles.helpSection}>
         <TouchableOpacity style={styles.helpButton}>
@@ -102,22 +102,25 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingBottom: 100
   }, 
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingTop: 45,
-    paddingHorizontal: 20,
-    backgroundColor: '#fff',
+  titleContainer: {
+    width: '100%',
+    paddingVertical: 5,
+    backgroundColor: '#FFFFFF', // 흰색 배경
+    alignItems: 'flex-start', // 글씨를 왼쪽에 배치
+    paddingTop: 60,
+    paddingLeft: 20, // 왼쪽 여백 추가
+    marginBottom: 20, // 상단 바 아래 공간 추가
   },
-  title: {
+  titleText: {
     fontSize: 24,
+    color: '#000',
     fontFamily: 'GowunBatangBold',
   },
   helpSection: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
     alignItems:'center',
-    marginTop:10,
+    marginTop:0,
     height:60,
     marginBottom:30
   },
