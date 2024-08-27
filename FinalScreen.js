@@ -6,12 +6,11 @@ export default function FinalScreen() {
   const navigation = useNavigation();
   const route = useRoute();
   console.log('Received params in FinalScreen:', route.params);
-  const { summary, oneLineSummary, imageUrl } = route.params || {}; // 전달된 요약 정보 및 이미지 URL
-
+  const { summary, oneLineSummary, imageUrl, diary } = route.params || {};
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!summary && !oneLineSummary && !imageUrl) {
+    if (!summary && !imageUrl && !diary) {
       console.error('요약 정보 또는 이미지가 제공되지 않았습니다.');
       setLoading(false);
       return;
@@ -19,7 +18,7 @@ export default function FinalScreen() {
 
     // 로딩 상태 해제
     setLoading(false);
-  }, [summary, oneLineSummary, imageUrl]);
+  }, [summary, imageUrl, diary]);
 
   return (
     <View style={styles.container}>
@@ -30,13 +29,19 @@ export default function FinalScreen() {
         <View style={styles.imageContainer}>
           {imageUrl ? (
             <TouchableOpacity onPress={() => console.log('메인 이미지가 클릭되었습니다.')}>
-              <Image source={{ uri: imageUrl }} style={styles.mainImage} />
+              <Image source={{ uri: imageUrl }} style={{ width: 375, height: 230 }} />
             </TouchableOpacity>
           ) : (
             <Text>이미지가 없습니다.</Text>
           )}
-          <Text style={styles.summaryText}>{summary || '요약 정보가 없습니다.'}</Text>
-          <Text style={styles.oneLineSummaryText}>{oneLineSummary || '한 줄 요약 정보가 없습니다.'}</Text>
+          <View style={styles.summaryContainer}>
+            <Text style={styles.sectionTitle}>"말랑이의 조언"</Text>
+            <Text style={styles.summaryText}>{summary || '요약 정보가 없습니다.'}</Text>
+          </View>
+          <View style={styles.diaryContainer}>
+            <Text style={styles.sectionTitle}>"오늘의 일기"</Text>
+            <Text style={styles.summaryText}>{diary || '일기 정보가 없습니다.'}</Text>
+          </View>
         </View>
       </ScrollView>
       <View style={styles.footer}>
@@ -67,11 +72,11 @@ const styles = StyleSheet.create({
   titleContainer: {
     width: '100%',
     paddingVertical: 5,
-    backgroundColor: '#FFFFFF', // 흰색 배경
-    alignItems: 'flex-start', // 글씨를 왼쪽에 배치
+    backgroundColor: '#FFFFFF',
+    alignItems: 'flex-start',
     paddingTop: 60,
-    paddingLeft: 20, // 왼쪽 여백 추가
-    marginBottom: 30, // 상단 바 아래 공간 추가
+    paddingLeft: 20,
+    marginBottom: 0,
   },
   titleText: {
     fontSize: 24,
@@ -80,29 +85,44 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     alignItems: 'center',
-    paddingBottom: 20,
+    paddingBottom: 150, // 하단 footer에 의해 가려지지 않도록 추가 여백
   },
   imageContainer: {
     alignItems: 'center',
     width: '100%',
   },
-  mainImage: {
-    width: '100%',
-    height: 200,
-    resizeMode: 'cover',
-    marginBottom: 20,
+  summaryContainer:{
+    width: '95%',
+    marginTop: 20,
+    padding: 10,
+    backgroundColor: '#FFF',
+    borderRadius: 10,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
   },
-  summaryText: {
-    fontSize: 18,
+  diaryContainer: {
+    width: '95%',
+    marginTop: 20,
+    padding: 10,
+    backgroundColor: '#FFF',
+    borderRadius: 10,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+  },
+  sectionTitle: {
+    fontSize: 22,
     textAlign: 'center',
     marginBottom: 10,
-    marginHorizontal: 10,
     fontFamily: 'GowunBatangBold',
   },
-  oneLineSummaryText: {
-    fontSize: 16,
+  summaryText: {
+    fontSize: 20,
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: 10,
     marginHorizontal: 10,
     fontFamily: 'GowunBatang',
   },
@@ -114,23 +134,22 @@ const styles = StyleSheet.create({
     height: 150,
     backgroundColor: '#F8F8F8',
     paddingHorizontal: 0,
-    paddingBVertical: 10,
-    bottom:0
+    paddingVertical: 10,
+    bottom: 0,
   },
   footerButton: {
-    verticalAlign:'row',
     alignItems: 'center',
-    marginHorizontal: 10
+    marginHorizontal: 10,
   },
   footerIcon: {
     width: 80,
     height: 80,
-    marginHorizontal: 10
+    marginHorizontal: 10,
   },
   footerText: {
-    marginTop:5,
+    marginTop: 5,
     fontSize: 20,
     color: '#787878',
-    fontFamily: 'Pretendard',  // 여기서 -Bold 폰트를 적용합니다.
+    fontFamily: 'Pretendard',
   },
 });

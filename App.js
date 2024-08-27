@@ -8,13 +8,13 @@ import MyPageScreen from './MyPageScreen';
 import RecordingScreen from './RecordingScreen';
 import FinalScreen from './FinalScreen'; // FinalScreen 추가
 import CalendarScreen from './CalendarScreen'; // CalendarScreen 추가
-
+import DiaryScreen from './DiaryScreen';
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Loading">
+      <Stack.Navigator initialRouteName="Signup">
         <Stack.Screen 
           name="Main" 
           component={MainScreen}
@@ -48,6 +48,11 @@ export default function App() {
         <Stack.Screen 
           name="Calendar" 
           component={CalendarScreen} // CalendarScreen 추가
+          options={{ title: '캘린더', headerShown: false }}
+        />
+        <Stack.Screen 
+          name="Diary" 
+          component={DiaryScreen}
           options={{ title: '캘린더', headerShown: false }}
         />
 

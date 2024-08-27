@@ -1,16 +1,22 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Image, Dimensions } from 'react-native';
 import { useFonts } from 'expo-font';
-import Icon from 'react-native-vector-icons/FontAwesome';
 import { useNavigation } from '@react-navigation/native';
 
-export default function DiaryScreen() {
+export default function ViewVideoScreen() { 
   const [fontsLoaded] = useFonts({
     GowunBatangBold: require('./assets/fonts/GowunBatangBold.ttf'),
     GowunBatang: require('./assets/fonts/GowunBatang.ttf'),
   });
 
   const navigation = useNavigation();
+  const [videoData, setVideoData] = useState([
+    { date: '2024.08.27', thumbnail: require('./assets/exPhoto0.webp'), description: '호텔에서 코딩하며 새로운 도전을 즐겼다.' },
+    { date: '2024.08.26', thumbnail: require('./assets/exPhoto1.jpg'), description: '마을회관에서 어르신들과 시원한 수박 나눠 먹으며 즐거운 시간을 보냈다.' },
+    { date: '2024.08.24', thumbnail: require('./assets/exPhoto2.jpg'), description: '오랫동안 미뤘던 대청소를 마치고 깨끗해진 집에서 여유로운 시간을 보냈다.' },
+    { date: '2024.08.21', thumbnail: require('./assets/exPhoto3.jpg'), description: '직접 담근 김치로 끓인 김치찌개로 만족스러운 저녁을 즐겼다.' },
+    { date: '2024.08.20', thumbnail: require('./assets/exPhoto4.jpg'), description: '오늘 감자 수확하며 허리는 아팠지만, 수확의 기쁨과 가족과의 저녁이 기대되는 날이었다.' },
+  ]);
 
   if (!fontsLoaded) {
     return null;
@@ -21,17 +27,17 @@ export default function DiaryScreen() {
   };
 
   const handleVideoPress = (date) => {
-    console.log(`${date}의 영상이 클릭되었습니다.`);
+    if (date === '2024.08.27') {
+      console.log(`${date}의 영상이 클릭되었습니다.`);
+      navigation.navigate('Diary', { 
+        date, 
+        customDescription: '이 내용은 8월 27일에 대한 맞춤형 설명입니다. 호텔에서 코딩하며 새로운 도전을 즐겼고, 그 경험은 무척 흥미로웠습니다.' 
+      });
+    } else {
+      console.log(`${date}의 영상이 클릭되었습니다.`);
+      navigation.navigate('Diary', { date });
+    }
   };
-
-  const videoData = [
-    { date: '2024.08.23', thumbnail: require('./assets/exPhoto1.jpg'), description: '이 날은 야구장에서 양현종의 완투승을 찍은 영상' },
-    { date: '2024.08.22', thumbnail: require('./assets/exPhoto2.jpg'), description: '집 안에서 강아지 뿡순이에게 옷을 입히는 영상' },
-    { date: '2024.08.21', thumbnail: require('./assets/exPhoto3.jpg'), description: '집 안에서 뿡순이의 옷과 함께 모자를 씌워주는 영상' },
-    { date: '2024.08.20', thumbnail: require('./assets/exPhoto4.jpg'), description: '우연히 간 교토의 술집의 안주를 먹는 영상' },
-    { date: '2024.08.19', thumbnail: require('./assets/exPhoto5.jpg'), description: '유니버셜 스튜디오의 음식점에서 피자를 먹는 영상' },
-    { date: '2024.08.18', thumbnail: require('./assets/exPhoto6.jpg'), description: '공원에서 평화로운 오후를 즐기며 찍은 영상' },
-  ];
 
   return (
     <View style={styles.container}>
@@ -47,7 +53,12 @@ export default function DiaryScreen() {
       <ScrollView contentContainerStyle={styles.scrollView}>
         {videoData.map((video, index) => (
           <TouchableOpacity key={index} style={styles.videoContainer} onPress={() => handleVideoPress(video.date)}>
-            <Image source={video.thumbnail} style={styles.thumbnailImage} />
+            <Image source={video.thumbnail} style={{ 
+              width: 125, 
+              height: 125, 
+              marginRight: 21,
+              borderRadius: 10,
+            }}  />
             <View style={styles.textContainer}>
               <Text style={styles.dateText}>{video.date}</Text>
               <Text style={styles.descriptionText}>{video.description}</Text>
@@ -92,17 +103,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 0,
   },
-  // 상단 타이틀 스타일
   titleContainer: {
     width: '100%',
     paddingVertical: 5,
-    backgroundColor: '#FFFFFF', // 흰색 배경
-    alignItems: 'flex-start', // 글씨를 왼쪽에 배치
+    backgroundColor: '#FFFFFF',
+    alignItems: 'flex-start',
     paddingTop: 60,
-    paddingLeft: 20, // 왼쪽 여백 추가
-    marginBottom: 30, // 상단 바 아래 공간 추가
+    paddingLeft: 20,
+    marginBottom: 30,
   },
   titleText: {
+    marginRight: 2,
     fontSize: 24,
     color: '#000',
     fontFamily: 'GowunBatangBold',
@@ -145,7 +156,10 @@ const styles = StyleSheet.create({
     marginRight: 20,
   },
   textContainer: {
+    height: '100%',
     flex: 1,
+    alignItems: 'flex-start',
+    justifyContent: 'flex-start',
   },
   dateText: {
     fontSize: 24,
@@ -168,25 +182,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     width: '100%',
-    height:160,
+    height: 160,
     backgroundColor: '#F8F8F8',
     paddingHorizontal: 10,
-    paddingBVertical: 0,
-    bottom:0
+    bottom: 0,
   },
   footerButton: {
-    verticalAlign:'row',
     alignItems: 'center',
   },
   footerIcon: {
     width: 80,
     height: 80,
-    marginHorizontal: 0
   },
   footerText: {
-    marginTop:5,
+    marginTop: 5,
     fontSize: 20,
     color: '#787878',
-    fontFamily: 'Pretendard',  // 여기서 -Bold 폰트를 적용합니다.
+    fontFamily: 'Pretendard',
   },
-}); 
+});

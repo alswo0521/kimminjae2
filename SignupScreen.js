@@ -39,7 +39,7 @@ export default function SignupScreen() {
 
       <View style={styles.header}>
         <Text style={styles.titleText}>내 생에 가장 소중한 기록,</Text>
-        <Text style={styles.mainText}>인생일기</Text>
+        <Text style={styles.mainText}>인생필름</Text>
 
         <Image
           source={require('./assets/silver.png')}  // 하단의 그림 이미지 경로
@@ -205,10 +205,10 @@ const styles = StyleSheet.create({
   },
   or:{
     position:'absolute',
-    bottom:130,
+    bottom:110,
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 40,
     justifyContent: 'center',
   },
   line:{

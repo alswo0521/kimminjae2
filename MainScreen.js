@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Image, ImageBackground } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useNavigation } from '@react-navigation/native';
+
 
 export default function MainScreen() {
   const [fontsLoaded] = useFonts({
@@ -14,11 +15,11 @@ export default function MainScreen() {
     PretendardBold: require('./assets/fonts/PretendardBold.ttf'),
     PretendardLight: require('./assets/fonts/PretendardLight.ttf')
   });
+  const [weatherTalk, setWeatherTalk] = useState('');
+  const [responseText, setResponseText] = useState('');
   const navigation = useNavigation();
 
-  if (!fontsLoaded) {
-    return null;
-  }
+
 
   const getCurrentDate = () => {
     const date = new Date();
@@ -28,6 +29,33 @@ export default function MainScreen() {
     const dayOfWeek = ['일', '월', '화', '수', '목', '금', '토'][date.getDay()];
     return `${year} - ${month} - ${day} (${dayOfWeek})`;
   }
+
+  const fetchWeatherComment = async () => {
+    try {
+        const response = await fetch('http://192.168.35.157:5000  /weather_comment'); // 서버 URL을 적절히 설정하세요
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        setWeatherTalk(data.weather_talk);
+    } catch (error) {
+        setError(error.message);
+    } finally {
+        setLoading(false);
+    }
+};
+
+
+  useEffect(() => {
+    if (fontsLoaded) {
+      fetchWeatherComment();
+    }
+  }, [fontsLoaded]);
+
+  if (!fontsLoaded) {
+    return null;
+  }
+
 
   return (
     <ImageBackground
@@ -48,9 +76,11 @@ export default function MainScreen() {
           <Image source={require('./assets/malangHi.png')} style={styles.helpImage}/>
         </TouchableOpacity>
         </View>
+        <View style={styles.promptContainer}>
+        <Text style={styles.promptText}>{weatherTalk}</Text>
+        </View>
       <View style={styles.body}>
-        <Text style={styles.questionText}>오늘, 당신의 하루는</Text>
-        <Text style={styles.questionText}>어떠셨나요?</Text>
+      
         <TouchableOpacity 
         style={styles.camerButton}
         onPress={() => navigation.navigate('Recording')}>
@@ -144,10 +174,18 @@ const styles = StyleSheet.create({
     height: 60,
   },
 
+  promptText:{
+    fontSize: 24,
+    fontFamily:'GowunBatangBold',
+    width:'80%',
+    alignSelf :'center',
+    textAlign:'center'
+  },
   body: {
     width:'100%',
     alignItems:'center',
-    marginTop:10
+    backgroundColor:'000',
+    marginTop:0
   },
   questionText: {
     fontSize: 28,
@@ -200,7 +238,8 @@ const styles = StyleSheet.create({
   footerButton: {
     verticalAlign:'row',
     alignItems: 'center',
-    marginHorizontal: 10
+    marginHorizontal: 10,
+    marginVertical:-10
   },
   cameraButton:{
     alignItems: 'center',
@@ -208,7 +247,7 @@ const styles = StyleSheet.create({
   footerIcon: {
     width: 80,
     height: 80,
-    marginHorizontal: 10
+    marginHorizontal: 10,
   },
   footerText: {
     marginTop:5,

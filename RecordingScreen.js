@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef,useEffect } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Image, ImageBackground,Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Camera,CameraType } from 'expo-camera/legacy';
@@ -16,13 +16,37 @@ export default function RecordingScreen() {
   const navigation = useNavigation();
 
 
+  useEffect(() => {
+    // 카메라 및 오디오 권한 요청
+    const requestPermissions = async () => {
+      try {
+        const cameraStatus = await Camera.requestCameraPermissionsAsync();
+        const audioStatus = await Audio.requestPermissionsAsync();
+        if (cameraStatus.status !== 'granted' || audioStatus.status !== 'granted') {
+          Alert.alert('권한 오류', '앱에서 사용할 수 있도록 카메라 및 오디오 권한을 허용해주세요.');
+        }
+      } catch (error) {
+        console.error('권한 요청 중 오류 발생:', error);
+      }
+    };
+
+    requestPermissions();
+  }, []); // 빈 배열을 두어 컴포넌트가 처음 마운트될 때만 실행되도록 합니다.
+
+
   const enableAudio = async () => {
-    await Audio.setAudioModeAsync({
+    try {
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
         playsInSilentModeIOS: true,
         staysActiveInBackground: false,
         shouldDuckAndroid: false,
-    });
-};
+        interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_MIX_WITH_OTHERS
+      });
+    } catch (error) {
+
+    }
+  };
 
 const fetchWithTimeout = (url, options, timeout = 10000) => {
   return Promise.race([
@@ -75,12 +99,12 @@ const downloadAndPlayAudio = async (audioUrl) => {
   // 초기 질문 가져오기
   const getInitialQuestion = async () => {
     try {
-      const response = await fetch('http://172.20.10.4:5000/initial-question');
+      const response = await fetch('http://192.168.35.47:5000/initial-question');
       if (response.ok) {
         const result = await response.json();
         console.log('Received audio path:', result.audio_path);
         setResponseText(result.response_text);
-        await downloadAndPlayAudio(`http://172.20.10.4:5000${result.audio_path}`);
+        await downloadAndPlayAudio(`http://192.168.35.47:5000${result.audio_path}`);
       } else {
         setResponseText('초기 질문을 불러오는 중 오류가 발생했습니다.');
       }
@@ -106,35 +130,29 @@ const downloadAndPlayAudio = async (audioUrl) => {
 // 비디오 녹화 시작
 const startVideoRecording = async () => {
   try {
-    // 카메라 권한 요청
-    const cameraStatus = await Camera.requestCameraPermissionsAsync();
-    // 오디오 권한 요청
-    const audioStatus = await Audio.requestPermissionsAsync();
+    if (cameraRef.current) {
+      console.log('Video recording started'); // 녹화 시작 로그 출력
+      setIsRecording(true); // 녹화 시작 시 isRecording을 true로 설정
 
-    if (cameraStatus.status === 'granted' && audioStatus.status === 'granted') {
-      if (cameraRef.current) {
-        console.log('Video recording started'); // 녹화 시작 로그 출력
-        setIsRecording(true); // 녹화 시작 시 isRecording을 true로 설정
+      const videoRecording = await cameraRef.current.recordAsync({
+        quality: Camera.Constants.VideoQuality['720p'],
+        maxDuration: 600,
+      });
 
-        const videoRecording = await cameraRef.current.recordAsync({
-          quality: Camera.Constants.VideoQuality['720p'],
-          maxDuration: 60,
-        });
-
-        console.log('Video recording finished with URI:', videoRecording.uri);
-        setIsRecording(false); // 녹화가 끝나면 isRecording을 false로 설정
-        setVideoUri(videoRecording.uri); // videoUri를 설정합니다.
-        return videoRecording.uri; // 녹화된 비디오의 URI를 반환
-      }
+      console.log('Video recording finished with URI:', videoRecording.uri);
+      setIsRecording(false); // 녹화가 끝나면 isRecording을 false로 설정
+      setVideoUri(videoRecording.uri); // videoUri를 설정합니다.
+      return videoRecording.uri; // 녹화된 비디오의 URI를 반환
     } else {
-      setResponseText('카메라 또는 오디오 권한이 거부되었습니다.');
-      return null; // 권한이 거부된 경우 null 반환
+      setResponseText('카메라가 준비되지 않았습니다.');
+      return null; // 카메라 참조가 없는 경우 null 반환
     }
   } catch (error) {
-    console.error('비디오 녹화 시작 중 오류 발생', error);
+    console.error('Error during video recording:', error);
     return null; // 오류 발생 시 null 반환
   }
 };
+
 
 // 비디오 녹화 중지
 const stopVideoRecording = async () => {
@@ -152,8 +170,7 @@ const stopVideoRecording = async () => {
 
   // 비디오 녹화 시작 버튼 핸들러
   const handleRecordingPress = async() => {
-    
-      await startVideoRecording();
+      startVideoRecording();
       getInitialQuestion();
     
   };
@@ -178,6 +195,7 @@ const handleSavePress = async () => {
           summary: result.summary || '요약 정보가 없습니다.',
           oneLineSummary: result.one_line_summary || '한 줄 요약 정보가 없습니다.',
           imageUrl: result.image_url || '',
+          diary : result.diary || ''
         });
       }
     } else {
@@ -215,7 +233,7 @@ const sendVideo = async (uri) => {
       name: 'user_recording.mov',
     });
 
-    const response = await fetch('http://172.20.10.4:5000/save-video', {
+    const response = await fetch('http://192.168.35.47:5000/save-video', {
       method: 'POST',
       body: formData,
     });
@@ -299,7 +317,7 @@ const sendAudio = async (uri, action = 'start') => {
             name: 'user_recording.m4a',
         });
 
-        const response = await fetch(`http://172.20.10.4:5000/process-audio?action=${action}`, {
+        const response = await fetch(`http://192.168.35.47:5000/process-audio?action=${action}`, {
             method: 'POST',
             body: formData,
         });
@@ -309,7 +327,7 @@ const sendAudio = async (uri, action = 'start') => {
             setResponseText(result.response_text);
 
             // 음성 파일을 자동으로 재생
-            const audioPath = `http://172.20.10.4:5000${result.audio_path}`;
+            const audioPath = `http://192.168.35.47:5000${result.audio_path}`;
             if (audioPath) {
                 const { sound } = await Audio.Sound.createAsync({ uri: audioPath });
                 await sound.playAsync();
@@ -351,8 +369,9 @@ const sendAudio = async (uri, action = 'start') => {
 
         <View style={styles.recordingContainer}>
           <Camera ref={cameraRef} style={StyleSheet.absoluteFillObject} type={CameraType.front} />
+          <View style={styles.characterImageContainer}>
           <Image source={require('./assets/malang.png')} style={styles.characterImage} />
-
+          </View>
           <TouchableOpacity 
             onPress={handleAudioRecordingPress} 
             style={isAudioRecording ? styles.micButtonActive : styles.micButton}
@@ -375,7 +394,7 @@ const sendAudio = async (uri, action = 'start') => {
           </TouchableOpacity>
           <TouchableOpacity style={styles.footerButton} onPress={ async () => {
             await handleSavePress();
-            navigation.navigate('Final'); // FinalScreen으로 이동
+            //navigation.navigate('Final'); // FinalScreen으로 이동
         }}>
   <Image source={require('./assets/save.png')} style={styles.footerIcon} />
   <Text style={styles.footerText}>저장하기</Text>
@@ -421,22 +440,25 @@ const styles = StyleSheet.create({
     paddingRight:20,
     paddingBottom: 70,
     flexDirection: 'row',
-    justifyContent: 'flex-start',
-    alignItems: 'flex-start',
     position: 'relative',
   },
   promptText: {
     fontFamily: 'GowunBatang',
-    fontSize: 22,
+    fontSize: 20,
+    textAlign:'center',
     color: '#000000',
   },
-  characterImage: {
-    position: 'absolute',
+  characterImageContainer:{
+    position:'absolute',
     right: -15,
     top: -93,
     width: 170,
     height: 120,
     resizeMode: 'contain',
+  },
+  characterImage: {
+    flex: 1,
+    width:'100%'
   },
   recordingContainer: {
     flex: 1,
@@ -478,12 +500,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: '100%',
     paddingHorizontal: 50,
-    paddingVertical: 20,
+    paddingVertical: 10,
+    marginTop:10
   },
   footerButton: {
     verticalAlign: 'row',
     alignItems: 'center',
     marginHorizontal: 10,
+    marginVertical:-10
   },
   footerIcon: {
     width: 80,
